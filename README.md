@@ -1,4 +1,4 @@
 # Modern-Joystick-For-Unity
 Inspired from the game. (Wild island: Durango)
 
-bundled without used third parties' resources like ngui.
+bundled without the third parties' resources used of, like ngui.
