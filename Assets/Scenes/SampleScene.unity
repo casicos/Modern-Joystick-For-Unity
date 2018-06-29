@@ -359,6 +359,49 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!1 &1045631175
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1045631176}
+  - component: {fileID: 1045631177}
+  m_Layer: 0
+  m_Name: UI Event Caster
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1045631176
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1045631175}
+  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalPosition: {x: 0, y: 750.0001, z: 0}
+  m_LocalScale: {x: 250.00006, y: 250.00009, z: 249.99998}
+  m_Children: []
+  m_Father: {fileID: 1497491296}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1045631177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1045631175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99508cebb7d478544b05412a0c735b7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RayCastCamera: {fileID: 994152116}
+  EventListenerGroup:
+  - {fileID: 1080410120}
 --- !u!1 &1080410117
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,6 +411,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1080410118}
   - component: {fileID: 1080410119}
+  - component: {fileID: 1080410120}
   m_Layer: 5
   m_Name: Joystick Symbol
   m_TagString: Untagged
@@ -386,7 +430,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1497491296}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1080410119
 MonoBehaviour:
@@ -416,7 +460,7 @@ MonoBehaviour:
     relative: 1
     absolute: 0
   updateAnchors: 1
-  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mColor: {r: 1, g: 1, b: 1, a: 0}
   mPivot: 4
   mWidth: 35
   mHeight: 35
@@ -442,6 +486,21 @@ MonoBehaviour:
   mAtlas: {fileID: 114909733995829374, guid: 57f1632132e43aa4caff0260f4a07ff8, type: 2}
   mSpriteName: HUD_ActionBar_Slot_Empty_Rounded
   mFillCenter: 1
+--- !u!114 &1080410120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1080410117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3598dced0eac417c87d7abc94c1ee2bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ListenableForBroadcast: 1
+  _focus: {fileID: 0}
+  _radius: 0.25
+  _fadeSpeed: 5
 --- !u!1 &1497491292
 GameObject:
   m_ObjectHideFlags: 0
@@ -552,9 +611,10 @@ Transform:
   m_GameObject: {fileID: 1497491292}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.0027777778, y: 0.0027777778, z: 0.0027777778}
+  m_LocalScale: {x: 0.004048583, y: 0.004048583, z: 0.004048583}
   m_Children:
   - {fileID: 994152114}
+  - {fileID: 1045631176}
   - {fileID: 1080410118}
   m_Father: {fileID: 0}
   m_RootOrder: 2

@@ -7,24 +7,20 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
 
     #region <Consts>
 	
+    public const int MouseInputTouchId = MaxTouchCount;
+    
     private const int MaxTouchCount = 10;
-    private const int MouseInputTouchId = -1;
 
     #endregion
 	
     #region <Fields>
 
+    public Camera RayCastCamera;
     public List<CustomUIEventListener> EventListenerGroup;
-    [SerializeField] private Camera _rayCastCamera;
 
     #endregion </Fields>
 	
     #region <Unity/Callbacks>
-
-    private void FixedUpdate()
-    {
-        throw new NotImplementedException();
-    }
 
     /// <summary>
     /// ListenEvent per update of the frame.
@@ -89,7 +85,7 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
         }
     }
 
-    private void InputProcess(Vector2 inputPosition, bool onClick, int eventTriggerId = 0)
+    private void InputProcess(Vector2 inputPosition, bool onClick, int eventTriggerId = MouseInputTouchId)
     {
         // Event has been started.
         if (onClick)
@@ -107,7 +103,7 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
 	
     private Collider2D GetReceiverColliderOnRayCast(Vector3 rayCastPoint)
     {
-        var ray = _rayCastCamera.ScreenPointToRay(rayCastPoint);
+        var ray = RayCastCamera.ScreenPointToRay(rayCastPoint);
         var rayCastHit = Physics2D.Raycast(ray.origin, ray.direction);
 
         return rayCastHit.collider;
