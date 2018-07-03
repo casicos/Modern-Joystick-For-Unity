@@ -11,7 +11,7 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
     
     private const int MaxTouchCount = 10;
 
-    #endregion
+    #endregion </Consts>
 	
     #region <Fields>
 
@@ -118,15 +118,15 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
     {
         // Filtered broadcast
         EventListenerGroup.Where(eventListener => eventListener.ListenableForBroadcast
-            || eventListener.gameObject == eventInfo.Collider
-            || eventListener.EventInfo.Id == eventInfo.Id)
+            || (eventInfo.Coliider != null && eventListener.gameObject == eventInfo.Collider)
+            || (eventListener.EventInfo != null && eventListener.EventInfo.Id == eventInfo.Id))
             .ToList().ForEach(eventListener => 
                 eventListener.SendMessage(eventMessage, eventInfo));
     }
 
     #endregion
 
-    #region <Class>
+    #region <Classes>
 
     public class UIEventInfo
     {
@@ -146,5 +146,5 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
         }
     }
 
-    #endregion </Class>
+    #endregion </Classes>
 }
