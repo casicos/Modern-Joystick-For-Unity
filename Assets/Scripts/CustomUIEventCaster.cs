@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,6 +17,7 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
 
     public Camera RayCastCamera;
     public List<CustomUIEventListener> EventListenerGroup;
+    public UIEventInfo GetLastUIEventInfo { get; private set; }
 
     #endregion </Fields>
 	
@@ -33,42 +34,51 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
 
     #region <Methods>
 
+    public void SetLastUIEventInfo(UIEventInfo eventInfo)
+    {
+        GetLastUIEventInfo = eventInfo;
+    }
+    
     /// <summary>
     /// Called by update per frame to listen something to event.
     /// </summary>
     private void ListenEvent()
     {
-        // Verifying the mouse event
-        var isLeftMouseButtonDown = Input.GetMouseButtonDown(0);
+        var isEventOccur = Input.touchCount > 0;
+    #if UNITY_EDITOR
         var isLeftMouseButtonUp = Input.GetMouseButtonUp(0);
-		
+        var isLeftMouseButtonDown = Input.GetMouseButtonDown(0);
+        isEventOccur = isEventOccur || isLeftMouseButtonUp || isLeftMouseButtonDown;
+    #endif
+        
         // Touch count > 0 means there is something to event 
-        if (Input.touchCount > 0 || isLeftMouseButtonDown || isLeftMouseButtonUp)
+        if (isEventOccur)
         {
-            UserInputEvent(Input.touchCount > 0);
+            UserInputEvent();
         }
     }
 
     private void UserInputEvent(bool isTouched = false)
     {
-        // Mobile Input.
-        if (isTouched)
-        {
+        #if UNITY_EDITOR
+            InputProcess(Input.mousePosition, onClick: Input.GetMouseButton(0));
+        #else
+            var touchCount = Input.touchCount;
             // Iterate for the checking of each touch events.
             for (var touchId = 0; 
-                touchId < Input.touchCount && touchId < MaxTouchCount; ++touchId)
+                touchId < MaxTouchCount && touchId < touchCount; ++touchId)
             {
                 var touch = Input.GetTouch(touchId);
-                var touchPhase = touch.phase;
-				
+                var touchPhase = touch.phase;                   
+
                 switch (touchPhase)
                 {
                     case TouchPhase.Began:
-                        InputProcess(touch.position, onClick: true, eventTriggerId: touchId);
+                        InputProcess(touch.position, onClick: true, eventTriggerId: touch.fingerId);
                         break;
                     case TouchPhase.Ended:
                     case TouchPhase.Canceled:
-                        InputProcess(touch.position, onClick: false, eventTriggerId: touchId);
+                        InputProcess(touch.position, onClick: false, eventTriggerId: touch.fingerId);
                         break;
                     case TouchPhase.Moved:
                     case TouchPhase.Stationary:
@@ -77,12 +87,7 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
                         throw new ArgumentOutOfRangeException();
                 }
             }
-        }
-        // PC Input.
-        else
-        {
-            InputProcess(Input.mousePosition, onClick: Input.GetMouseButtonDown(0));
-        }
+        #endif
     }
 
     private void InputProcess(Vector2 inputPosition, bool onClick, int eventTriggerId = MouseInputTouchId)
@@ -92,12 +97,14 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
         {
             var rayCastCollider = GetReceiverColliderOnRayCast(inputPosition);					            
 			
-            BroadcastEvent("OnClickBegan", new UIEventInfo(eventTriggerId, rayCastCollider));
+            Send("OnClickBegin", new UIEventInfo(eventTriggerId, inputPosition, rayCastCollider));
         }
         // Event has been terminated.
         else
         {
-            BroadcastEvent("OnClickEnded", eventTriggerId);
+            var rayCastCollider = GetReceiverColliderOnRayCast(inputPosition);                        
+            
+            Send("OnClickEnd", new UIEventInfo(eventTriggerId, inputPosition, rayCastCollider));
         }
     }
 	
@@ -109,42 +116,60 @@ public class CustomUIEventCaster : Singleton<CustomUIEventCaster> {
         return rayCastHit.collider;
     }
     
-    private void BroadcastEvent(string eventMessage, int id)
+    private void Send(string eventMessage, int id, Vector2 position)
     {
-        BroadcastEvent(eventMessage, new UIEventInfo(id));
+        Send(eventMessage, new UIEventInfo(id, position));
     }
         
-    private void BroadcastEvent(string eventMessage, UIEventInfo eventInfo)
+    private void Send(string eventMessage, UIEventInfo eventInfo)
     {
-        // Filtered broadcast
-        EventListenerGroup.Where(eventListener => eventListener.ListenableForBroadcast
-            || (eventInfo.Coliider != null && eventListener.gameObject == eventInfo.Collider)
-            || (eventListener.EventInfo != null && eventListener.EventInfo.Id == eventInfo.Id))
-            .ToList().ForEach(eventListener => 
-                eventListener.SendMessage(eventMessage, eventInfo));
+        GetLastUIEventInfo = eventInfo;
+        
+        for (var eventListenerIndex = 0; eventListenerIndex < EventListenerGroup.Count; ++eventListenerIndex)
+        {
+            var eventListener = EventListenerGroup[eventListenerIndex];            
+            var isListenableForBroadcast = eventListener.ListenableForBroadcast;
+            var isCollidedEventListener = 
+                eventInfo.Collider != null && eventListener.gameObject == eventInfo.Collider.gameObject;
+            var hasEqualEventId = eventListener.EventInfo.IsActive && eventListener.EventInfo.Id == eventInfo.Id;
+
+            if (isListenableForBroadcast 
+                || isCollidedEventListener 
+                || hasEqualEventId)
+            {
+                eventListener.SendMessage(eventMessage);                
+            }
+        }
     }
 
     #endregion
 
-    #region <Classes>
+    #region <Structs>
 
-    public class UIEventInfo
+    public struct UIEventInfo
     {
-        public readonly Collider2D Collider;
         public readonly int Id;
+        public readonly Vector2 Position;
+        public Collider2D Collider;
+        public bool IsActive;
         
-        public UIEventInfo(int id)
+        public UIEventInfo(int id, Vector2 position)
         {
             Collider = null;
+            Position = position;
             Id = id;
+            IsActive = true;
         }
         
-        public UIEventInfo(int id, Collider2D collider)
+        public UIEventInfo(int id, Vector2 position, Collider2D collider)
         {
             Collider = collider;
+            Position = position;
             Id = id;
+            IsActive = true;
         }
+        
     }
 
-    #endregion </Classes>
+    #endregion </Structs>
 }
